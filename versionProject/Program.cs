@@ -1,4 +1,16 @@
-﻿using System;
+﻿/*
+ Application Name: VersionProject
+ Owners: Neha Tyagi 
+ *       Prerna Nain
+ *       Mani Khanuja
+ *       Sahib Malhotra
+ *Brief Description: This application is intended for implementing a command Create Repo for creating repository of folder system provided in the
+ *                   source path by user. As result this application will create a repository at destination folder by copying complete source tree 
+ *                   and keeping a unique copy of file leaves using checksum mechanism for naming them.This way we maintain a unique version of source 
+ *                   files and have a description of changes made as manifest.txt file.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,16 +21,10 @@ namespace versionProject
 {
     class Program
     {
-        private static List<string> fileTreeData;
-
-        public static List<string> FileTreeData
-        {
-            get { return fileTreeData; }
-            set { fileTreeData = value; }
-        }
+       
 
 
-
+        //This is the starting point of application
         static void Main(string[] args)
         {
             FileTreeData = new List<string>();
@@ -51,6 +57,25 @@ namespace versionProject
 
         }
 
+        /// <summary>
+        ///List of leaves aka files along with their unique Artifact Id and other details 
+        /// </summary>
+        private static List<string> fileTreeData;
+
+        public static List<string> FileTreeData
+        {
+            get { return fileTreeData; }
+            set { fileTreeData = value; }
+        }
+
+
+        /// <summary>
+        /// This function takes sourcePath and destinationPath as parameters and create a copy for complete
+        /// tree structure of folder and files in source folder.
+        /// </summary>
+        /// <param name="SourcePath"></param>
+        /// <param name="DestinationPath"></param>
+        /// <returns></returns>
         private static bool CopyFolderContents(string SourcePath, string DestinationPath)
         {
             SourcePath = SourcePath.EndsWith(@"\") ? SourcePath : SourcePath + @"\";
@@ -78,7 +103,7 @@ namespace versionProject
                         else
                         {
                             Directory.CreateDirectory(DestinationPath + fileInfo.Name);
-                            string artifactIDFile = CreateArtifactID(fileInfo.DirectoryName + "\\" + fileInfo.Name);
+                            string artifactIDFile = CreateArtifactID(fileInfo.DirectoryName + "\\" + fileInfo.Name); // generating Artifact ID for each file present at source location to maintain versions
                             fileInfo.CopyTo(string.Format(@"{0}\{1}", DestinationPath + fileInfo.Name, artifactIDFile + fileInfo.Extension), true);
                             FileTreeData.Add(artifactIDFile + fileInfo.Extension + "\t" + fileInfo.Name + "\t" + fileInfo.DirectoryName);
                         }
@@ -101,6 +126,11 @@ namespace versionProject
             }
         }
 
+        /// <summary>
+        /// This function uses rotating checksum mechanism to generate a unique checksum followed by Artifact Id for a file. A cycle of 4 is used with numbers 1,3,11,17
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns> returns unique Artifact ID for file specified at input location</returns>
         private static string CreateArtifactID(string path)
         {
             try
@@ -156,7 +186,12 @@ namespace versionProject
         }
 
 
-
+        /// <summary>
+        /// This function creates and maintain a manifest file for the command issued by user along with details such as timeStamp , source , destination etc.
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="source"></param>
+        /// <param name="destination"></param>
         public static void manifestWrite(String command, String source, String destination)
         {
             var projectName = source.Split('\\');
